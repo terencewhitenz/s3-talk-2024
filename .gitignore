@@ -35,3 +35,10 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# ignore credentials file to prevent loading access key / secret key to a public repo
+tf-credentials
+# ignore backend file which is created by running the terrafor boot script
+terraform/backend.tf.*
+# ignore any zip files created for lambdas
+terraform/*.zip
