@@ -1,3 +1,15 @@
+resource "aws_s3_bucket" "notifications" {
+  bucket        = "${var.prefix}-bucket-notifications"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_versioning" "notifications" {
+  bucket   = aws_s3_bucket.notifications.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_iam_role" "send-to-api" {
   name               = "${var.prefix}-lambda-send-to-api"
   assume_role_policy = data.aws_iam_policy_document.lambda-assume-role.json
@@ -36,7 +48,6 @@ data "archive_file" "send-to-api" {
 }
 
 resource "aws_lambda_function" "send-to-api" {
-  provider = aws.ap-southeast-2
   depends_on = [
     aws_iam_role_policy_attachment.send-to-api
   ]
@@ -61,12 +72,11 @@ resource "aws_lambda_permission" "s3-call-send-to-api" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.send-to-api.arn
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.ap-southeast-2.arn
+  source_arn    = aws_s3_bucket.notifications.arn
 }
 
 resource "aws_s3_bucket_notification" "bucket-notification" {
-  provider = aws.ap-southeast-2
-  bucket   = aws_s3_bucket.ap-southeast-2.id
+  bucket   = aws_s3_bucket.notifications.id
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.send-to-api.arn

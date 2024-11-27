@@ -4,18 +4,6 @@ resource "aws_s3_bucket" "ap-southeast-2" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket" "us-east-1" {
-  provider      = aws.us-east-1
-  bucket        = "${var.prefix}-bucket-us-east-1"
-  force_destroy = true
-}
-
-resource "aws_s3_bucket" "eu-west-1" {
-  provider      = aws.eu-west-1
-  bucket        = "${var.prefix}-bucket-eu-west-1"
-  force_destroy = true
-}
-
 resource "aws_s3_bucket_versioning" "ap-southeast-2" {
   provider = aws.ap-southeast-2
   bucket   = aws_s3_bucket.ap-southeast-2.id
@@ -24,12 +12,24 @@ resource "aws_s3_bucket_versioning" "ap-southeast-2" {
   }
 }
 
+resource "aws_s3_bucket" "us-east-1" {
+  provider      = aws.us-east-1
+  bucket        = "${var.prefix}-bucket-us-east-1"
+  force_destroy = true
+}
+
 resource "aws_s3_bucket_versioning" "us-east-1" {
   provider      = aws.us-east-1
   bucket        = "${var.prefix}-bucket-us-east-1"
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket" "eu-west-1" {
+  provider      = aws.eu-west-1
+  bucket        = "${var.prefix}-bucket-eu-west-1"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "eu-west-1" {
