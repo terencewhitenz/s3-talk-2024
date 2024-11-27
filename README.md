@@ -13,6 +13,6 @@ To apply the Terraform and create the infrastructure run `./tf-apply`.
 To clean up the resources created by Terraform run `./tf-destroy`.
 
 To clean up all the resources created by this run `./cleanup`.
-`./cleanup` first runs `./tf-destroy` to clean up the Terraform resources and then removes the Terraform state file and then destroys the CloudFormation stack created in ./boot
+`./cleanup` first runs `./tf-destroy` to clean up the Terraform resources and then removes the Terraform state file and then destroys the CloudFormation stack created in `./boot`
 
 Resources created by Terraform *may cost you money* - there are 2 fairly minimal EC2 instances created within the free tier but the onus is on you to clean them up using the ./tf-destroy or cleanup after you are done.
