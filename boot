@@ -16,7 +16,7 @@ PREFIX=$1
 STACK_NAME=$(basename ${PWD})
 REGION=ap-southeast-2
 echo Creating new cloudformation stack to bootstrap Terraform
-#aws cloudformation create-stack --stack-name $STACK_NAME --capabilities CAPABILITY_IAM --template-body file://cloudformation/terraform-boot.yaml --region $REGION > /dev/null 
+aws cloudformation create-stack --stack-name $STACK_NAME --capabilities CAPABILITY_IAM --template-body file://cloudformation/terraform-boot.yaml --region $REGION > /dev/null 
 aws cloudformation wait stack-create-complete --stack-name $STACK_NAME --region $REGION
 echo Stack creation complete
 STACK_OUTPUTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs" --region $REGION)
