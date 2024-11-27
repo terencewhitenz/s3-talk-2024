@@ -36,10 +36,10 @@ echo terraform/backend.tf.${STACK_NAME} created
 
 echo 'export AWS_ACCESS_KEY_ID="'${TERRAFORM_ACCESS_KEY}'"' > tf-credentials
 echo 'export AWS_SECRET_ACCESS_KEY="'${TERRAFORM_SECRET_ACCESS_KEY}'"' >> tf-credentials
+echo 'unset AWS_SESSION_TOKEN' >> tf-credentials
 echo tf-credentials created
 
 echo 'prefix="'$PREFIX'"' > terraform/terraform.tfvars
 echo terraform/terraform.tfvars created
 
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 ./tf-init && ./tf-plan
