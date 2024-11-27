@@ -1,0 +1,6 @@
+#!/bin/bash
+
+STACK_NAME=$(basename ${PWD})
+. tf-credentials
+cd terraform
+terraform init -backend-config=backend.tf.${STACK_NAME} --reconfigure

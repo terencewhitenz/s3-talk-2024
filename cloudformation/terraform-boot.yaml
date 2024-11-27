@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create resources to getting Terraform going
+
+Parameters: 
+  TerraformAccessStatus:
+    Type: String
+    AllowedValues:
+      - Active
+      - Inactive
+    Default: Active
+
+Resources: 
+        
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    Properties: 
+      EnableKeyRotation: true
+      Description: Encrypt data in the S3 bucket, DynamodB and Secrets Manager secret for Terraform bootstrap
+      PendingWindowInDays: 7
+
+  TerraformStateS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketEncryption: 
+         ServerSideEncryptionConfiguration: 
+           -
+             BucketKeyEnabled: true
+             ServerSideEncryptionByDefault: 
+               KMSMasterKeyID: !Ref EncryptionKey
+               SSEAlgorithm: aws:kms
+      OwnershipControls: 
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  TerraformDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        -         
+          AttributeName: "LockID"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      KeySchema: 
+        -   
+          AttributeName: LockID
+          KeyType: HASH
+      SSESpecification: 
+        KMSMasterKeyId: !Ref EncryptionKey
+        SSEEnabled: true
+        SSEType: KMS
+
+  TerraformUser:
+    Type: AWS::IAM::User
+    Properties: 
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  TerraformUserAccess:
+    Type: AWS::IAM::AccessKey
+    Properties: 
+      Status: !Ref TerraformAccessStatus
+      UserName: !Ref TerraformUser
+
+  TerraformAccessSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Description: Access Key and Secret Access ID for Terraform user for this account
+      KmsKeyId: !Ref EncryptionKey
+      SecretString: !Sub '{"AccessKeyId" : "${TerraformUserAccess}", "SecretAccessKey" : "${TerraformUserAccess.SecretAccessKey}"}'
+
+Outputs:
+  TerraformStateS3Bucket:
+    Value: !Ref TerraformStateS3Bucket    
+  TerraformAccessSecret:
+    Value: !Ref TerraformAccessSecret
+  TerraformDynamoDBTable:
+    Value: !Ref TerraformDynamoDBTable

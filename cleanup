@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ -z "${AWS_SESSION_TOKEN}" ]
+then
+  echo "Need to have an admin role creds set up in the environment"
+  exit 1
+fi
+
+echo Cleaning up Terraform created resources
+./tf-destroy
+
+STACK_NAME=$(basename ${PWD})
+REGION=ap-southeast-2
+echo Removing old Terraform state file
+STACK_OUTPUTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs" --region $REGION)
+TERRAFORM_BUCKET=$(echo $STACK_OUTPUTS | jq -r '.[] | select(.OutputKey=="TerraformStateS3Bucket") | .OutputValue')
+aws s3 rm s3://${TERRAFORM_BUCKET}/state
+
+echo Removing cloudformation stack and cleaning up Terraform boot resources
+aws cloudformation delete-stack --stack-name $STACK_NAME --region $REGION 
+aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME --region $REGION
+echo Stack deletion complete
+
+rm terraform/backend.tf.${STACK_NAME} tf-credentials terraform/terraform.tfvars
+echo terraform/backend.tf.${STACK_NAME} tf-credentials terraform/terraform.tfvars files deleted
