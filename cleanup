@@ -6,15 +6,17 @@ then
   exit 1
 fi
 
-echo Cleaning up Terraform created resources
-./tf-destroy
+echo Clean up Terraform created resources before running this script to clean up the Terraform user and state file
+echo Run ./tf-destroy and check that everything is removed properly before continuing
+echo Once this runs past this step you will be left to clean up any remaining Terraform created resources yourself
+read -p "Press enter to continue or Control C to stop"
 
 STACK_NAME=$(basename ${PWD})
 REGION=ap-southeast-2
 echo Removing old Terraform state file
 STACK_OUTPUTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs" --region $REGION)
 TERRAFORM_BUCKET=$(echo $STACK_OUTPUTS | jq -r '.[] | select(.OutputKey=="TerraformStateS3Bucket") | .OutputValue')
-aws s3 rm s3://${TERRAFORM_BUCKET}/state
+aws s3 rm s3://${TERRAFORM_BUCKET}/state --region $REGION 
 
 echo Removing cloudformation stack and cleaning up Terraform boot resources
 aws cloudformation delete-stack --stack-name $STACK_NAME --region $REGION 
@@ -23,3 +25,6 @@ echo Stack deletion complete
 
 rm terraform/backend.tf.${STACK_NAME} tf-credentials terraform/terraform.tfvars
 echo terraform/backend.tf.${STACK_NAME} tf-credentials terraform/terraform.tfvars files deleted
+
+echo Make sure to run this to clear your AWS credentials from your session
+echo unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN

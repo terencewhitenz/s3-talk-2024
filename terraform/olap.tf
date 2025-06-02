@@ -37,15 +37,6 @@ data "aws_iam_policy_document" "censor-csv" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:GetObject"
-    ]
-    resources = [
-      "${aws_s3_bucket.olap.arn}/*"
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
       "s3-object-lambda:WriteGetObjectResponse"
     ]
     resources = [

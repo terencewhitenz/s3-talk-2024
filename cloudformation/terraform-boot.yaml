@@ -15,7 +15,7 @@ Resources:
     Type: AWS::KMS::Key
     Properties: 
       EnableKeyRotation: true
-      Description: Encrypt data in the S3 bucket, DynamodB and Secrets Manager secret for Terraform bootstrap
+      Description: Encrypt data in the S3 bucket and Secrets Manager secret for Terraform bootstrap
       PendingWindowInDays: 7
 
   TerraformStateS3Bucket:
@@ -36,23 +36,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-
-  TerraformDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties: 
-      AttributeDefinitions: 
-        -         
-          AttributeName: "LockID"
-          AttributeType: "S"
-      BillingMode: PAY_PER_REQUEST
-      KeySchema: 
-        -   
-          AttributeName: LockID
-          KeyType: HASH
-      SSESpecification: 
-        KMSMasterKeyId: !Ref EncryptionKey
-        SSEEnabled: true
-        SSEType: KMS
 
   TerraformUser:
     Type: AWS::IAM::User
@@ -78,5 +61,3 @@ Outputs:
     Value: !Ref TerraformStateS3Bucket    
   TerraformAccessSecret:
     Value: !Ref TerraformAccessSecret
-  TerraformDynamoDBTable:
-    Value: !Ref TerraformDynamoDBTable
